@@ -18,10 +18,6 @@ export const initializeData = (data) => {
 export const getCalculatedGrandTotal = (data) => {
   if (!data) return;
   return data?.reduce((total, row) => {
-    return (
-      total +
-      row?.value +
-      row?.children.reduce((childTotal, child) => childTotal + child.value, 0)
-    );
+    return total + row?.value;
   }, 0);
 };

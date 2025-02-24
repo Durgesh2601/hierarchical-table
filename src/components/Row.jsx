@@ -17,7 +17,6 @@ const Row = ({ row, parent, updateData, isChild = false }) => {
   // Function to update row's value based on percentage or fixed value
   const updateRowValue = (newValue, isPercentage) => {
     let updatedRow = { ...row };
-
     if (isPercentage) {
       updatedRow.value = row.value + (row.value * newValue) / 100;
     } else {
@@ -61,6 +60,23 @@ const Row = ({ row, parent, updateData, isChild = false }) => {
 
       // Update the parent row with the new value and variance
       updateData(updatedParent);
+    } else {
+      // Case 2: If no parent exists, update all the child values based on the variance of the parent (distribute proportionally)
+      const totalChildValue = row.children.reduce(
+        (total, child) => total + child.value,
+        0
+      );
+      const updatedChildren = row?.children?.map((childItem) => {
+        const child = { ...childItem };
+        // Calculate each child's new value and variance based on the parent's updated variance
+        const proportionalPercent = (child.value / totalChildValue) * 100;
+        child.value = updatedRow.value * (proportionalPercent / 100);
+        child.variance =
+          ((child.value - child.originalValue) / child.originalValue) * 100;
+        return child;
+      });
+
+      updatedRow.children = updatedChildren;
     }
 
     return updatedRow;
@@ -73,7 +89,10 @@ const Row = ({ row, parent, updateData, isChild = false }) => {
           {isChild && "-- "}
           {row.label}
         </td>
-        <td>{row.value}</td>
+        <td>
+          {" "}
+          {Number.isInteger(row?.value) ? row?.value : row?.value?.toFixed(2)}
+        </td>
         <td>
           <InputField inputValue={inputValue} setInputValue={setInputValue} />
         </td>

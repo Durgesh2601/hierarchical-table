@@ -41,7 +41,9 @@ const Table = () => {
       </table>
       <div>
         <strong>Grand Total: </strong>
-        {calculatedGrandTotal}
+        {Number.isInteger(calculatedGrandTotal)
+          ? calculatedGrandTotal
+          : calculatedGrandTotal?.toFixed(2)}{" "}
       </div>
     </div>
   );
