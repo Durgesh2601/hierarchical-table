@@ -9,7 +9,8 @@ const Row = ({ row, parent, updateData, isChild = false }) => {
 
   // Update variance when value changes
   useEffect(() => {
-    const newVariance = ((row.value - row.originalValue) / row.originalValue) * 100;
+    const newVariance =
+      ((row.value - row.originalValue) / row.originalValue) * 100;
     setVariance(newVariance);
   }, [row.value, row.originalValue]);
 
@@ -22,28 +23,41 @@ const Row = ({ row, parent, updateData, isChild = false }) => {
     } else {
       updatedRow.value = newValue;
     }
-
+    updatedRow.variance =
+      ((updatedRow.value - updatedRow.originalValue) /
+        updatedRow.originalValue) *
+      100;
     updatedRow = recalculateParent(updatedRow); // Recalculate parent value and variance
 
     // Update the row and recursively update children
     updateData(updatedRow);
+    setInputValue("");
   };
 
   // Recalculate parent row when a child row's value changes
   const recalculateParent = (updatedRow) => {
     if (parent) {
       const updatedParent = { ...parent };
-
+      const updatedChildren = updatedParent.children.map((child) => {
+        if (child.id === updatedRow.id) {
+          return updatedRow;
+        } else {
+          return child;
+        }
+      });
       // Calculate the sum of children's values
-      const totalChildValue = updatedParent.children.reduce(
+      const totalChildValue = updatedChildren.reduce(
         (total, child) => total + child.value,
         0
       );
 
       updatedParent.value = totalChildValue;
-
+      updatedParent.children = updatedChildren;
       // Recalculate parent's variance
-      updatedParent.variance = ((updatedParent.value - updatedParent.originalValue) / updatedParent.originalValue) * 100;
+      updatedParent.variance =
+        ((updatedParent.value - updatedParent.originalValue) /
+          updatedParent.originalValue) *
+        100;
 
       // Update the parent row with the new value and variance
       updateData(updatedParent);
@@ -83,7 +97,7 @@ const Row = ({ row, parent, updateData, isChild = false }) => {
           <Row
             key={child.id}
             row={child}
-            parent={row}  // Passing the current row as the parent to the child
+            parent={row} // Passing the current row as the parent to the child
             updateData={updateData}
             isChild={true}
           />
